@@ -1,16 +1,51 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
+import { useRouter } from "next/navigation";
 
 export default function CreatePage() {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [scriptContent, setScriptContent] = useState("");
+  const router = useRouter();
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); // Prevent the browser's default form submission
+
+    const formData = new FormData(event.currentTarget);
+    const scriptData = {
+      name: formData.get("info"),
+      language: formData.get("language"),
+      content: formData.get("message"),
+    };
+
+    console.log("Submitting to REST API:", scriptData);
+
+    try {
+      // The fetch request to your Java/Spring Boot backend
+            const response = await fetch('http://localhost:8080/api/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scriptData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      console.log("Script saved successfully via REST API!");
+      router.push('/'); // Redirect to homepage on success
+    } catch (error) {
+      console.error("Failed to save script:", error);
+      // Here you would show an error message to the user
+    }
+  }
 
   return (
     <>
 <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+      <form onSubmit={handleSubmit} className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
        <h1 className="text-6xl font-extrabold mb-16 text-center"><span style={{color: 'hsl(25, 60%, 55%)'}}>Create and Store</span> Scripts Here</h1>
 
        <div className="space-y-4">
@@ -97,7 +132,7 @@ export default function CreatePage() {
     </button>
         
        
-      </div>
+      </form>
     </main>
     </>
   );
