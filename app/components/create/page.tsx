@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function CreatePage() {
   const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -13,16 +14,17 @@ export default function CreatePage() {
 
     const formData = new FormData(event.currentTarget);
     const scriptData = {
+      id: uuidv4(),
       name: formData.get("info"),
       language: formData.get("language"),
-      content: formData.get("message"),
+      message: scriptContent,
     };
 
     console.log("Submitting to REST API:", scriptData);
 
     try {
       // The fetch request to your Java/Spring Boot backend
-            const response = await fetch('http://localhost:8080/api/create', {
+            const response = await fetch('http://localhost:8000/api/v1/scripts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
